@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MongoDBContainer;
@@ -43,7 +44,7 @@ class ProductserviceApplicationTests {
 	}
 
 	@Test
-	void shouldCreateProduct() throws Exception {
+	public void shouldCreateProduct() throws Exception {
 		ProductRequest productRequest = getProductRequest();
 		String productRequestString = objectMapper.writeValueAsString(productRequest);
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/product")
@@ -60,5 +61,19 @@ class ProductserviceApplicationTests {
 							.description("iPhone 13")
 							.price(BigDecimal.valueOf(1200))
 							.build();
+	}
+
+	@Test
+	public void shouldGetProduct() throws Exception {
+		ProductRequest productRequest = getProductRequest();
+		String productRequestString = objectMapper.writeValueAsString(productRequest);
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/product")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(productRequestString));
+
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/product"))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+
+		Assertions.assertEquals(1, productRepository.findAll().size());
 	}
 }
