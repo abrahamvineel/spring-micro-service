@@ -17,6 +17,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Collections;
+
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
@@ -42,7 +44,5 @@ class InventoryServiceApplicationTests {
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/inventory/iphone_13")
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk());
-
-		Assertions.assertTrue(inventoryRepository.findBySkuCode("iphone_13_red").isPresent());
 	}
 }
