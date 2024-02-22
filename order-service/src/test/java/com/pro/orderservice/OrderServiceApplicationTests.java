@@ -47,7 +47,6 @@ class OrderServiceApplicationTests {
 		dynamicPropertyRegistry.add("spring.data.postgresql.uri", container::getTestQueryString);
 	}
 
-
 	@Test
 	public void shouldCreateOrder() throws Exception {
 		OrderRequest orderRequest = getOrderRequest();
