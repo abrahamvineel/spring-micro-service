@@ -1,5 +1,6 @@
 package com.pro.orderservice.service;
 
+import com.pro.orderservice.dto.InventoryResponse;
 import com.pro.orderservice.dto.OrderLineItemsDto;
 import com.pro.orderservice.dto.OrderRequest;
 import com.pro.orderservice.model.Order;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,13 +33,21 @@ public class OrderService {
         order.setOrderLineItemsList(orderLineItems);
 
         //call inventory service and place order if product is in stock
-        Boolean result = webClient.get()
-                .uri("http://localhost:9192/api/inventory")
+
+        List<String> skuCodes = order.getOrderLineItemsList().stream().map(OrderLineItems::getSkuCode)
+                .toList();
+        InventoryResponse[] inventoryResponses = webClient.get()
+                .uri("http://localhost:9192/api/inventory",
+                        uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes)
+                                .build())
                 .retrieve()
-                .bodyToMono(Boolean.class)
+                .bodyToMono(InventoryResponse[].class)
                 .block();
 
-        if(result) {
+        boolean allProductsInStock = Arrays.stream(inventoryResponses)
+                                           .allMatch(InventoryResponse::isInStock);
+
+        if(allProductsInStock) {
             orderRepository.save(order);
         } else {
             throw new IllegalArgumentException("Product is in stock, please try again later");
